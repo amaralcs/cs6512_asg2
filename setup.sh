@@ -74,7 +74,7 @@ echo ""
 
 
 # Step 3: build and deploy image
-ver=v0.1
+ver=v0.2
 img_name=anomaly_detector
 docker build . -t $img_name:$ver || exit 1
 
@@ -88,22 +88,24 @@ docker tag $img_name:$ver $img
 docker push $img || exit 1
 echo "  success!"
 
-echo "Setup complete"
 
 # Step 4: create lambda function
 role="$(aws iam get-role --role-name LabRole | jq '.Role.Arn' | sed 's/"//g')"
 fun=live_anomaly_detector
 
 fun_check="$(aws lambda get-function --function-name $fun)"
-if [ -z $fun_check]
+if [ -z $fun_check ]
 then
     echo "Creating lambda function $fun ..."
     aws lambda create-function \
         --function-name $fun \
         --package-type Image \
         --code ImageUri=$img \
-        --role $role
+        --role $role \
+        || exit 1
 else
-    echo "Function $fun already exists, skipping creation"
+    echo "Function $fun already exists, updating code with newest image"
+    aws lambda update-function-code --function-name $fun --image-uri $img || exit 1
 fi
 
+echo "Setup complete"
