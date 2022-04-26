@@ -1,0 +1,13 @@
+__pycache__
+.vscode
+data/
+results/
+test_results/
+anomaly_detector_models/
+crypto_compare_reader/
+cs6512_assignment_2.py
+local_anomaly_detector.py
+s3.py
+requirements.txt
+lambda_anomaly_detector.py
+Dockerfile
