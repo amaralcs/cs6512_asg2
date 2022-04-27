@@ -24,7 +24,7 @@ echo "Installing required package: jq"
 sudo apt-get install jq
 
 dir_name=$1
-if [ -z "$dir_name" ]
+if [[ -z "${dir_name}" ]]
 then
     dir_name=ul-crypto-prices
     echo "Using default value for s3 bucket name: $dir_name"
@@ -38,7 +38,7 @@ mkdir "$dir_name"
 cp data/instrument_price.csv "$dir_name/instrument_price.csv"
 
 cur_bucket="$(aws s3 ls | grep $dir_name)"
-if [ -z $cur_bucket ]
+if [[ -z ${cur_bucket} ]]
 then
     echo "  creating s3 bucket..."
     aws s3api create-bucket --bucket $dir_name
@@ -52,7 +52,7 @@ echo ""
 
 # Step 2: create ecr repository
 repo_name=$2
-if [ -z "$repo_name" ]
+if [[ -z "${repo_name}" ]]
 then
     repo_name=anomaly_detector
     echo "Using default name for ECR repo: $repo_name"
@@ -61,7 +61,7 @@ else
 fi
 
 repo_list="$(aws ecr describe-repositories | jq 'select(.repositories[])')"
-if [ -z "$repo_list" ]
+if [[ -z "${repo_list}" ]]
 then
     echo "No ECR repositories were found $repo_list"
     echo "Creating $repo_name ..."
@@ -74,7 +74,7 @@ echo ""
 
 
 # Step 3: build and deploy image
-ver=v0.2
+ver=latest
 img_name=anomaly_detector
 docker build . -t $img_name:$ver || exit 1
 
@@ -94,7 +94,7 @@ role="$(aws iam get-role --role-name LabRole | jq '.Role.Arn' | sed 's/"//g')"
 fun=live_anomaly_detector
 
 fun_check="$(aws lambda get-function --function-name $fun)"
-if [ -z $fun_check ]
+if [[ -z ${fun_check} ]]
 then
     echo "Creating lambda function $fun ..."
     aws lambda create-function \
